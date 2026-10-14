@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mängdkollen – räkna åtgång för avjämning, fix och bruk</title>
+  <meta name="description" content="Mängdkollen – räkna åtgång för avjämning, fix och bruk. Kilo, säckar och vatten med tillverkarnas egna värden.">
+  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1d1f" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mängdkollen">
+  <script>
+    // Sätt tema före första renderingen för att undvika blink
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+      if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) document.documentElement.classList.add('standalone');
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css?v=25">
+</head>
+<body>
+  <a class="skip" href="#kalkyl">Hoppa till kalkylatorn</a>
+
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="#" aria-label="Mängdkollen, till toppen">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="var(--accent)"/>
+          <rect x="12" y="16" width="40" height="7" rx="2" fill="var(--on-accent)"/>
+          <rect x="12" y="28.5" width="40" height="7" rx="2" fill="var(--on-accent)" opacity=".72"/>
+          <rect x="12" y="41" width="40" height="7" rx="2" fill="var(--on-accent)" opacity=".45"/>
+        </svg>
+        <span class="brand__text">Mängdkollen</span>
+      </a>
+      <nav class="nav" aria-label="Huvudmeny">
+        <a href="#kalkyl">Kalkyl</a>
+        <a href="#register">Register</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+      <div class="theme">
+        <button id="themeToggle" class="switch" role="switch" aria-checked="false" aria-label="Mörkt tema">
+          <span class="switch__track">
+            <svg class="switch__icon switch__icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+            <svg class="switch__icon switch__icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></svg>
+            <span class="switch__thumb"></span>
+          </span>
+        </button>
+        <button id="themeAuto" class="theme__auto" type="button" hidden>Auto</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero__inner">
+        <p class="eyebrow">Räkna åtgång för avjämning, fix och bruk</p>
+        <h1>Räkna rätt mängd innan du åker till bygghandeln.</h1>
+        <p class="lead">Välj fabrikat och produkt. Ange yta och skikt så får du kilo, säckar och vatten, beräknat med tillverkarens egna åtgångsvärden.</p>
+        <dl class="stats" id="stats"></dl>
+      </div>
+      <div class="hero__stripe" aria-hidden="true"></div>
+    </section>
+
+    <!-- KALKYLATOR -->
+    <section id="kalkyl" class="section">
+      <div class="wrap">
+        <div class="section__head">
+          <h2>Kalkylator</h2>
+          <p>Visar bara produkter med registrerat åtgångsvärde. Gråmarkerade val saknar fullständiga villkor och ger ingen mängd.</p>
+        </div>
+
+        <div class="calc">
+          <form class="card calc__form" id="calcForm" novalidate>
+            <fieldset class="field">
+              <legend class="label">Materialtyp</legend>
+              <div class="chips" id="groupChips" role="radiogroup"></div>
+            </fieldset>
+
+            <div class="grid-2" id="productPick">
+              <label class="field">
+                <span class="label">Fabrikat</span>
+                <select id="brandSelect" class="input"></select>
+              </label>
+              <label class="field">
+                <span class="label">Produkt / applicering</span>
+                <select id="usageSelect" class="input"></select>
+              </label>
+            </div>
+
+            <div class="product-info" id="productInfo" aria-live="polite"></div>
+
+            <div class="grid-2" id="inputs">
+              <label class="field" data-for="area">
+                <span class="label">Yta</span>
+                <span class="input-unit"><input id="area" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="12"><span>m²</span></span>
+              </label>
+              <label class="field" data-for="thickness">
+                <span class="label">Medeltjocklek</span>
+                <span class="input-unit"><input id="thickness" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="10"><span>mm</span></span>
+                <button type="button" class="linkbtn" id="slopeToggle">Lutande yta? Räkna medeltjocklek</button>
+              </label>
+              <label class="field" data-for="trowel" data-hidden="true">
+                <span class="label">Tandning (fixkam)</span>
+                <select id="trowelSelect" class="input"></select>
+              </label>
+            </div>
+
+            <div class="slope" id="jointBox" data-hidden="true">
+              <label class="field">
+                <span class="label">Plattans längd</span>
+                <span class="input-unit"><input id="tileL" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="30"><span>cm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Plattans bredd</span>
+                <span class="input-unit"><input id="tileB" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="30"><span>cm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Fogbredd</span>
+                <span class="input-unit"><input id="jointW" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="3"><span>mm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Fogdjup</span>
+                <span class="input-unit"><input id="jointD" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="8"><span>mm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Densitet</span>
+                <span class="input-unit"><input id="jointRho" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="1,6"><span>kg/l</span></span>
+              </label>
+              <p class="hint" id="jointHint">Fogdjup är normalt plattans tjocklek. Densiteten 1,6 kg/l är ett snittvärde för cementbaserade fogbruk; ändra den om du har tillverkarens värde.</p>
+            </div>
+
+            <div class="slope" id="sealBox" data-hidden="true">
+              <label class="field">
+                <span class="label">Fogbredd</span>
+                <span class="input-unit"><input id="sealW" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="6"><span>mm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Fogdjup</span>
+                <span class="input-unit"><input id="sealD" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="6"><span>mm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Foglängd</span>
+                <span class="input-unit"><input id="sealLen" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="20"><span>m</span></span>
+              </label>
+              <p class="hint">Rektangulär fogprofil: bredd × djup × längd.</p>
+            </div>
+
+            <div class="slope" id="slopeBox" hidden>
+              <label class="field">
+                <span class="label">Minsta tjocklek</span>
+                <span class="input-unit"><input id="slopeMin" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="5"><span>mm</span></span>
+              </label>
+              <label class="field">
+                <span class="label">Största tjocklek</span>
+                <span class="input-unit"><input id="slopeMax" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="25"><span>mm</span></span>
+              </label>
+              <p class="hint">Medeltjocklek = (min + max) / 2. Gäller jämnt lutande plan, inte runt punktbrunn.</p>
+            </div>
+
+            <div class="grid-2">
+              <label class="field">
+                <span class="label">Spillpåslag <output id="wasteOut">5 %</output></span>
+                <input id="waste" class="range" type="range" min="0" max="30" step="1" value="5">
+              </label>
+              <div class="field" data-for="pack">
+                <label class="label" for="packSelect">Förpackning</label>
+                <select id="packSelect" class="input"></select>
+                <span class="input-unit" id="packCustom" hidden><input id="pack" class="input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Ange storlek" aria-label="Egen förpackningsstorlek"><span id="packUnit">kg</span></span>
+              </div>
+            </div>
+          </form>
+
+          <aside class="card result" id="result" aria-live="polite"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="register" class="section">
+      <div class="wrap">
+        <div class="section__head">
+          <h2>Produktregister</h2>
+          <p>Alla fabrikat och produkter i registret, med länk till källan. Fler åtgångsvärden fylls på allt eftersom.</p>
+        </div>
+        <div class="filters">
+          <label class="field field--grow">
+            <span class="sr-only">Sök produkt</span>
+            <input id="regSearch" class="input" type="search" placeholder="Sök produkt, fabrikat eller kategori…" autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="sr-only">Fabrikat</span>
+            <select id="regBrand" class="input"></select>
+          </label>
+          <label class="check">
+            <input id="regOnlyCalc" type="checkbox">
+            <span>Bara med kalkyl</span>
+          </label>
+        </div>
+        <p class="reg__count" id="regCount" aria-live="polite"></p>
+        <ul class="reg" id="regList"></ul>
+        <button class="btn btn--ghost reg__more" id="regMore" type="button" hidden>Visa fler</button>
+      </div>
+    </section>
+
+    <!-- KONTAKT -->
+    <section id="kontakt" class="section section--alt">
+      <div class="wrap">
+        <div class="contact card">
+          <div class="contact__me">
+            <img id="contactPhoto" class="avatar" src="img/profil.jpg" alt="" width="112" height="112" loading="lazy" decoding="async">
+            <div>
+              <h2 class="contact__title">Saknar du en produkt?</h2>
+              <p>Hör av dig så lägger jag till den. Tipsa gärna om produktblad eller länk, så går det fortare.</p>
+              <p class="contact__name" id="contactName"></p>
+            </div>
+          </div>
+          <form class="contact__form" id="contactForm" novalidate>
+            <div class="grid-2 grid-2--tight">
+              <label class="field"><span class="label">Namn</span><input class="input" name="namn" autocomplete="name" required></label>
+              <label class="field"><span class="label">E-post</span><input class="input" name="epost" type="email" autocomplete="email" inputmode="email" required></label>
+              <label class="field"><span class="label">Fabrikat</span><input class="input" name="fabrikat" list="brandList" placeholder="t.ex. Weber"></label>
+              <label class="field"><span class="label">Produkt</span><input class="input" name="produkt" placeholder="t.ex. weberfloor 110"></label>
+            </div>
+            <label class="field"><span class="label">Meddelande</span><textarea class="input" name="meddelande" rows="3" placeholder="Länk till produktblad eller annat som är bra att veta"></textarea></label>
+            <input class="hp" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <datalist id="brandList"></datalist>
+            <div class="contact__actions">
+              <button class="btn" type="submit">Skicka önskemål</button>
+              <p class="form-msg" id="formMsg" role="status"></p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <p><strong>Ansvar:</strong> Resultatet är en mängdberäkning baserad på tillverkarnas publicerade riktvärden, inte ett tekniskt godkännande av konstruktionen. Kontrollera alltid aktuellt produktblad, underlag och systemkrav.</p>
+      <p class="footer__meta" id="footerMeta"></p>
+    </div>
+  </footer>
+
+  <nav class="tabbar" id="tabbar" aria-label="Appmeny">
+    <a href="#kalkyl" data-sec="kalkyl">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h1M12 12h1M15.5 12h0M8.5 16h1M12 16h1M15.5 16h0"/></svg>
+      <span>Kalkyl</span>
+    </a>
+    <a href="#register" data-sec="register">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>
+      <span>Register</span>
+    </a>
+    <a href="#kontakt" data-sec="kontakt">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>
+      <span>Kontakt</span>
+    </a>
+  </nav>
+
+  <button type="button" class="resultbar" id="resultBar" aria-label="Visa hela resultatet">
+    <span class="resultbar__text"><span class="resultbar__main" id="resultBarMain"></span><span class="resultbar__sub" id="resultBarSub"></span></span>
+    <svg class="resultbar__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+  </button>
+
+  <div class="toast" id="installToast" hidden>
+    <span>Installera som app på hemskärmen</span>
+    <button class="btn btn--small" id="installBtn" type="button">Installera</button>
+    <button class="toast__close" id="installClose" type="button" aria-label="Stäng">×</button>
+  </div>
+
+  <script src="data.js?v=25"></script>
+  <script src="app.js?v=25"></script>
+</body>
+</html>

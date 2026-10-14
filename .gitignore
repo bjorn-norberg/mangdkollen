@@ -1,0 +1,5 @@
+# Används bara lokalt för att bygga data.js – publiceras inte
+*.xlsx
+tools/
+VERIFIERING.md
+__pycache__/
