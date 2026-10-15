@@ -312,11 +312,20 @@ textarea.input { resize: vertical; min-height: 90px; }
 /* ---------- Install-toast ---------- */
 .toast {
   position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-  display: flex; align-items: center; gap: 12px; z-index: 60;
+  display: flex; align-items: center; gap: 10px; z-index: 60;
   background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
-  padding: 10px 10px 10px 16px; border-radius: 99px; font-weight: 600; font-size: .92rem;
-  width: max-content; max-width: calc(100% - 32px);
+  padding: 8px 6px 8px 8px; border-radius: 18px; font-size: .92rem;
+  width: max-content; max-width: calc(100% - 24px);
+  animation: toast-in .35s cubic-bezier(.2, .9, .3, 1.2) both;
 }
+.toast[hidden] { display: none; }
+.toast__icon { width: 36px; height: 36px; border-radius: 9px; flex: none; }
+.toast__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.toast__text strong { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toast__text small { color: var(--muted); font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes toast-in { from { transform: translate(-50%, 120%); opacity: 0; } }
+@media (max-width: 380px) { .toast__icon { display: none; } .toast { padding-left: 14px; } }
+@media (max-width: 330px) { .toast__text small { display: none; } }
 .toast__close { background: none; border: 0; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 4px 8px; }
 
 /* ---------- Responsivt ---------- */
@@ -437,3 +446,43 @@ html.standalone #kalkyl { padding-top: 20px; }
   content: ""; position: absolute; top: -6px; left: 50%; width: 28px; height: 3px; margin-left: -14px;
   border-radius: 0 0 3px 3px; background: var(--accent);
 }
+
+/* ---------- Installationsguide (iPhone/iPad m.fl.) ---------- */
+.sheet { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; justify-content: center; }
+.sheet[hidden] { display: none; }
+.sheet__backdrop { position: absolute; inset: 0; background: rgb(0 0 0 / .5); animation: fade-in .2s ease both; }
+.sheet__panel {
+  position: relative; width: 100%; max-width: 480px; margin: 0 12px calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 22px;
+  padding: 20px 20px 16px; box-shadow: 0 20px 60px rgb(0 0 0 / .4);
+  animation: sheet-in .3s cubic-bezier(.2, .9, .3, 1.1) both;
+}
+.sheet__close { position: absolute; top: 8px; right: 8px; }
+.sheet__head { display: flex; align-items: center; gap: 14px; padding-right: 36px; }
+.sheet__head img { width: 48px; height: 48px; border-radius: 12px; flex: none; }
+.sheet__head h2 { margin: 0; font: 800 1.2rem/1.2 var(--font-display); }
+.sheet__head p { margin: 2px 0 0; color: var(--muted); font-size: .88rem; }
+.sheet__steps { list-style: none; counter-reset: step; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
+.sheet__steps li {
+  counter-increment: step; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px;
+  padding: 10px 12px 10px 48px; position: relative; min-height: 48px;
+  background: var(--surface-2, var(--bg)); border: 1px solid var(--line); border-radius: 14px; font-size: .95rem;
+}
+.sheet__steps li::before {
+  content: counter(step); position: absolute; left: 12px; top: 50%; margin-top: -13px;
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: .85rem;
+}
+.sheet__steps i { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); vertical-align: middle; }
+.sheet__steps .muted i { width: 22px; height: 22px; border-radius: 6px; }
+.sheet__steps svg { width: 18px; height: 18px; fill: none; stroke: var(--accent-text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sheet__steps svg circle { fill: var(--accent-text); stroke: none; }
+.sheet__steps .muted { color: var(--muted); font-size: .82rem; }
+.sheet__hint { margin: 12px 2px 0; color: var(--muted); font-size: .85rem; }
+.sheet__arrow { display: none; justify-content: center; margin-top: 6px; }
+.sheet__arrow svg { width: 30px; height: 30px; fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.sheet__arrow.is-down { display: flex; animation: nudge 1.2s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: translateY(6px); } }
+@keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } }
+@keyframes fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .toast, .sheet__panel, .sheet__backdrop, .sheet__arrow.is-down { animation: none; } }

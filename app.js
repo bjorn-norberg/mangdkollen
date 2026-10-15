@@ -640,24 +640,63 @@
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
   }
-  var toast = $('#installToast'), installBtn = $('#installBtn'), deferred = null;
+  // Flytande ruta "Installera som app". Knappen tar en direkt till sista steget:
+  // Android/Chrome/Edge/Samsung visar webbläsarens egen installationsruta,
+  // på iPhone/iPad (där Apple inte tillåter att sidan öppnar den) visas en kort guide som pekar på Dela-knappen.
+  var toast = $('#installToast'), installBtn = $('#installBtn'), sheet = $('#installSheet'), deferred = null;
   var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  var dismissed = store.get('installDismissed');
+  var ua = navigator.userAgent;
+  var isIPad = /ipad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isIOS = /iphone|ipod/i.test(ua) || isIPad;
+  var isMobile = isIOS || /android|mobile/i.test(ua) || window.matchMedia('(pointer: coarse)').matches;
+  var hiddenByUser = store.get('installHidden');
+  var ICON = { share: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M7 10H5.5A1.5 1.5 0 0 0 4 11.5v8A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5v-8a1.5 1.5 0 0 0-1.5-1.5H17"/></svg>', add: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M12 8.5v7M8.5 12h7"/></svg>', dots: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>' };
+
+  function showToast() { if (!standalone && !hiddenByUser) toast.hidden = false; }
+  function hideToast() { toast.hidden = true; }
+
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault(); deferred = e;
-    if (!dismissed) toast.hidden = false;
+    showToast();
   });
-  installBtn.addEventListener('click', function () {
-    if (!deferred) return;
-    deferred.prompt();
-    deferred.userChoice.finally(function () { deferred = null; toast.hidden = true; });
-  });
-  $('#installClose').addEventListener('click', function () { toast.hidden = true; store.set('installDismissed', true); });
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  if (isIOS && !standalone && !dismissed) {
-    toast.querySelector('span').textContent = 'Installera: tryck Dela och sedan ”Lägg till på hemskärmen”';
-    installBtn.hidden = true;
-    setTimeout(function () { toast.hidden = false; }, 2500);
+  // På mobilen visas rutan även där webbläsaren inte har någon egen installationsruta (iPhone, Firefox m.fl.)
+  if (isMobile) setTimeout(showToast, 1500);
+
+  function openGuide() {
+    var steps, hint;
+    if (isIOS) {
+      steps = [
+        'Tryck på <b>Dela</b> <i>' + ICON.share + '</i>' + (isIPad ? '' : ' <span class="muted">(i nyare iOS ligger den under <i>' + ICON.dots + '</i>)</span>'),
+        'Välj <b>Lägg till på hemskärmen</b> <i>' + ICON.add + '</i>',
+        'Tryck på <b>Lägg till</b> uppe till höger'
+      ];
+      hint = isIPad ? 'Dela-knappen finns uppe till höger i Safari.' : 'Dela-knappen finns i verktygsfältet längst ner i Safari.';
+    } else {
+      steps = [
+        'Öppna webbläsarens meny <i>' + ICON.dots + '</i>',
+        'Välj <b>Installera app</b> eller <b>Lägg till på startskärmen</b> <i>' + ICON.add + '</i>',
+        'Bekräfta med <b>Installera</b>'
+      ];
+      hint = 'Menyn finns oftast uppe till höger, i Firefox och Samsung Internet ibland längst ner.';
+    }
+    $('#installSteps').innerHTML = steps.map(function (s) { return '<li>' + s + '</li>'; }).join('');
+    $('#installHint').textContent = hint;
+    $('#installArrow').className = 'sheet__arrow' + (isIOS && !isIPad ? ' is-down' : ' is-up');
+    sheet.hidden = false; hideToast();
+    sheet.querySelector('.sheet__close').focus();
   }
-  window.addEventListener('appinstalled', function () { toast.hidden = true; });
+  function closeGuide() { sheet.hidden = true; showToast(); }
+  sheet.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeGuide(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) closeGuide(); });
+
+  installBtn.addEventListener('click', function () {
+    if (deferred) {
+      deferred.prompt();
+      deferred.userChoice.then(function (r) { if (r.outcome === 'accepted') hideToast(); }).finally(function () { deferred = null; });
+    } else {
+      openGuide();
+    }
+  });
+  $('#installClose').addEventListener('click', function () { hideToast(); hiddenByUser = true; store.set('installHidden', true); });
+  window.addEventListener('appinstalled', function () { standalone = true; hideToast(); sheet.hidden = true; });
 })();

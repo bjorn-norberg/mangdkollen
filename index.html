@@ -9,8 +9,10 @@
   <meta name="theme-color" content="#1c1d1f" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="icons/mangdkollen-32.png?v=3" type="image/png" sizes="32x32">
+  <link rel="icon" href="icons/icon.svg?v=3" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/mangdkollen-touch-180.png?v=3" sizes="180x180">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -25,7 +27,7 @@
       if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) document.documentElement.classList.add('standalone');
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=25">
+  <link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
   <a class="skip" href="#kalkyl">Hoppa till kalkylatorn</a>
@@ -35,9 +37,9 @@
       <a class="brand" href="#" aria-label="Mängdkollen, till toppen">
         <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
           <rect width="64" height="64" rx="14" fill="var(--accent)"/>
-          <rect x="12" y="16" width="40" height="7" rx="2" fill="var(--on-accent)"/>
-          <rect x="12" y="28.5" width="40" height="7" rx="2" fill="var(--on-accent)" opacity=".72"/>
-          <rect x="12" y="41" width="40" height="7" rx="2" fill="var(--on-accent)" opacity=".45"/>
+          <rect x="41" y="14" width="6" height="12" fill="var(--on-accent)"/>
+          <path d="M32 11 56 32H8Z" fill="var(--on-accent)" stroke="var(--on-accent)" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M15 30h34v23H37V43a5 5 0 0 0-10 0v10H15Z" fill="var(--on-accent)"/>
         </svg>
         <span class="brand__text">Mängdkollen</span>
       </a>
@@ -270,13 +272,28 @@
     <svg class="resultbar__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
   </button>
 
-  <div class="toast" id="installToast" hidden>
-    <span>Installera som app på hemskärmen</span>
+  <div class="toast" id="installToast" role="region" aria-label="Installera appen" hidden>
+    <img class="toast__icon" src="icons/icon-192.png" alt="" width="36" height="36">
+    <span class="toast__text"><strong>Installera som app</strong><small>Snabbare start, fungerar offline</small></span>
     <button class="btn btn--small" id="installBtn" type="button">Installera</button>
     <button class="toast__close" id="installClose" type="button" aria-label="Stäng">×</button>
   </div>
 
-  <script src="data.js?v=25"></script>
-  <script src="app.js?v=25"></script>
+  <div class="sheet" id="installSheet" hidden>
+    <div class="sheet__backdrop" data-close></div>
+    <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="installSheetTitle">
+      <button class="toast__close sheet__close" type="button" aria-label="Stäng" data-close>×</button>
+      <div class="sheet__head">
+        <img src="icons/icon-192.png" alt="" width="48" height="48">
+        <div><h2 id="installSheetTitle">Lägg till Mängdkollen</h2><p>Så lägger du appen på hemskärmen.</p></div>
+      </div>
+      <ol class="sheet__steps" id="installSteps"></ol>
+      <p class="sheet__hint" id="installHint"></p>
+      <div class="sheet__arrow" id="installArrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v15M6 13l6 6 6-6"/></svg></div>
+    </div>
+  </div>
+
+  <script src="data.js?v=27"></script>
+  <script src="app.js?v=27"></script>
 </body>
 </html>

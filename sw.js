@@ -1,5 +1,5 @@
 /* Service worker – offlinestöd för Mängdkollen */
-const VERSION = 'atgang-v25';
+const VERSION = 'atgang-v27';
 const SHELL = [
   './',
   'index.html',
@@ -8,6 +8,9 @@ const SHELL = [
   'data.js',
   'manifest.webmanifest',
   'icons/icon.svg',
+  'favicon.ico',
+  'icons/mangdkollen-32.png',
+  'icons/mangdkollen-touch-180.png',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'img/profil.jpg',
