@@ -3,12 +3,11 @@
   'use strict';
 
   // ---- Inställningar för kontaktformuläret --------------------------------
-  // formEndpoint: t.ex. en Formspree-adress (https://formspree.io/f/xxxx). Skickas som JSON.
-  // email:        används som reserv (öppnar e-postprogrammet) om formEndpoint saknas.
+  // formEndpoint: Cloudflare Workern som mejlar meddelandet vidare (samma som för vvs.junestaden.se).
+  //               Sajtens adress måste finnas med i SITES i Workern (Junestaden/worker/contact.js).
   var CONFIG = {
     name: 'Björn',
-    formEndpoint: '',
-    email: 'bjorn.jkpg@gmail.com'
+    formEndpoint: 'https://junestaden-kontakt.bjorn-jkpg.workers.dev/api/contact'
   };
 
   var D = window.ATGANG_DATA;
@@ -588,7 +587,7 @@
   photo.addEventListener('error', function () { photo.src = 'img/profil.svg'; }, { once: true });
   $('#contactName').textContent = '/ ' + CONFIG.name;
 
-  var form = $('#contactForm'), msg = $('#formMsg');
+  var form = $('#contactForm'), msg = $('#formMsg'), formOpened = Date.now();
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     msg.className = 'form-msg'; msg.textContent = '';
@@ -605,33 +604,30 @@
     }
     if (bad) { bad.focus(); msg.className = 'form-msg err'; msg.textContent = 'Fyll i namn och en giltig e-postadress.'; return; }
 
+    // Fälten i det format Workern förväntar sig. t = hur länge sidan varit öppen (spamskydd).
+    var subject = 'Produktönskemål: ' + ([fd.get('fabrikat'), fd.get('produkt')].filter(Boolean).join(' ') || 'övrigt');
     var payload = {
-      namn: fd.get('namn'), epost: fd.get('epost'), fabrikat: fd.get('fabrikat'),
-      produkt: fd.get('produkt'), meddelande: fd.get('meddelande'),
-      _subject: 'Produktönskemål: ' + [fd.get('fabrikat'), fd.get('produkt')].filter(Boolean).join(' ')
+      name: fd.get('namn'), email: fd.get('epost'), subject: subject,
+      message: 'Fabrikat: ' + (fd.get('fabrikat') || '–') + '\nProdukt: ' + (fd.get('produkt') || '–') + '\n\n' + (fd.get('meddelande') || ''),
+      website: fd.get('_gotcha') || '', t: Date.now() - formOpened
     };
 
-    if (CONFIG.formEndpoint) {
-      var btn = form.querySelector('button[type="submit"]');
-      btn.disabled = true;
-      fetch(CONFIG.formEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(function (r) {
-        if (!r.ok) throw new Error(r.status);
-        form.reset();
-        msg.className = 'form-msg ok'; msg.textContent = 'Tack! Ditt önskemål är skickat.';
-      }).catch(function () {
-        msg.className = 'form-msg err'; msg.textContent = 'Kunde inte skicka just nu. Försök igen senare.';
-      }).finally(function () { btn.disabled = false; });
-    } else if (CONFIG.email) {
-      var body = 'Fabrikat: ' + payload.fabrikat + '\nProdukt: ' + payload.produkt + '\n\n' + payload.meddelande + '\n\n/ ' + payload.namn + ' (' + payload.epost + ')';
-      location.href = 'mailto:' + CONFIG.email + '?subject=' + encodeURIComponent(payload._subject) + '&body=' + encodeURIComponent(body);
-      msg.className = 'form-msg ok'; msg.textContent = 'Ditt e-postprogram öppnas med meddelandet ifyllt.';
-    } else {
-      msg.className = 'form-msg err'; msg.textContent = 'Formuläret är inte kopplat ännu. Ange formEndpoint eller email i app.js.';
-    }
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    msg.className = 'form-msg'; msg.textContent = 'Skickar…';
+    fetch(CONFIG.formEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      form.reset();
+      msg.className = 'form-msg ok'; msg.textContent = 'Tack! Ditt önskemål är skickat.';
+    }).catch(function () {
+      msg.className = 'form-msg err'; msg.textContent = navigator.onLine === false
+        ? 'Du verkar vara offline. Försök igen när du har internet.'
+        : 'Kunde inte skicka just nu. Försök igen om en stund.';
+    }).finally(function () { btn.disabled = false; });
   });
 
   /* =========================================================
