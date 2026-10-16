@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mangdkollen.junestaden.se/sitemap.xml
+Sitemap: https://bygg.junestaden.se/sitemap.xml
