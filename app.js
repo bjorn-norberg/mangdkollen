@@ -244,6 +244,7 @@
     renderTrowel(e);
     renderPacks(current());
     update();
+    rememberRecent();
   });
   el.trowel.addEventListener('change', function () {
     state.usageId = el.trowel.value; // samma produkt: behåll vald förpackning
@@ -527,6 +528,7 @@
     }
     state.group = u.group; state.brand = u.brand; state.usageId = u.id;
     renderChips(); renderBrands(); renderUsage(); update();
+    rememberRecent();
     document.getElementById('kalkyl').scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -644,6 +646,212 @@
     setTimeout(function () { f.elements.namn.focus({ preventScroll: true }); }, 450);
   }
   renderReg();
+
+  /* =========================================================
+     Produktsök: rullgardin på datorn, helskärmsvy på mobilen
+     ========================================================= */
+  // Gemener utan accenter, så att "schonox" hittar SCHÖNOX och "avjamning" hittar avjämning
+  function norm(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  var searchItems = [], searchByPid = {};
+  enabledUsage.forEach(function (u) {
+    if (searchByPid[u.productId] || GROUPS.indexOf(u.group) < 0) return;
+    var p = productById[u.productId];
+    var it = { pid: u.productId, uid: firstEnabled[u.productId], name: p ? p.name : u.product, brand: u.brand, group: u.group };
+    it.hay = norm(it.brand + ' ' + it.name + ' ' + it.group);
+    searchByPid[u.productId] = it;
+    searchItems.push(it);
+  });
+  function queryWords(q) { return norm(q).split(/\s+/).filter(Boolean); }
+  function findProducts(q, max) {
+    var words = queryWords(q);
+    if (!words.length) return [];
+    var rank = function (it) {
+      var n = norm(it.name);
+      return n.indexOf(words[0]) === 0 ? 0 : norm(it.brand).indexOf(words[0]) === 0 ? 1 : 2;
+    };
+    return searchItems.filter(function (it) {
+      return words.every(function (w) { return it.hay.indexOf(w) >= 0; });
+    }).sort(function (a, b) {
+      return rank(a) - rank(b) || a.name.localeCompare(b.name, 'sv');
+    }).slice(0, max);
+  }
+  // Markera de delar av namnet som matchar sökorden
+  function highlight(name, q) {
+    var words = queryWords(q), n = name.split('').map(function (c) { return norm(c).charAt(0) || c; }).join('');
+    var on = new Array(name.length);
+    words.forEach(function (w) {
+      for (var i = n.indexOf(w); i >= 0; i = n.indexOf(w, i + w.length)) for (var k = 0; k < w.length; k++) on[i + k] = true;
+    });
+    var out = '', open = false;
+    for (var i = 0; i < name.length; i++) {
+      if (on[i] && !open) { out += '<mark>'; open = true; }
+      if (!on[i] && open) { out += '</mark>'; open = false; }
+      out += esc(name.charAt(i));
+    }
+    return out + (open ? '</mark>' : '');
+  }
+  function noHits(q) {
+    return '<div class="psearch__empty">Ingen produkt med kalkyl matchar <b>' + esc(q) + '</b>.' +
+      ' <button type="button" class="linkbtn" data-wish-q="' + esc(q) + '">Önska den</button></div>';
+  }
+
+  // Senast räknade produkter (sparas bara i den här webbläsaren)
+  function rememberRecent() {
+    var u = D.usage.find(function (x) { return x.id === state.usageId; });
+    if (!u || isFog() || !searchByPid[u.productId]) return;
+    var r = (store.get('recent') || []).filter(function (id) { return id !== u.productId; });
+    r.unshift(u.productId);
+    store.set('recent', r.slice(0, 4));
+  }
+  function recentItems() {
+    return (store.get('recent') || []).map(function (id) { return searchByPid[id]; }).filter(Boolean);
+  }
+
+  // Välj en träff: rätt kategori, fabrikat och produkt, och markören i Yta
+  function scrollToArea() { el.area.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  function pickProduct(it, deferScroll) {
+    selectUsage(it.uid);
+    rememberRecent();
+    if (!deferScroll) scrollToArea();
+    // fokus direkt i samma tryck, annars öppnar inte iPhone tangentbordet
+    el.area.focus({ preventScroll: true });
+    el.area.select();
+  }
+  function wishQuery(q) { wishProduct({ brand: '', name: q }); }
+
+  var ps = $('#psearch'), psList = $('#psearchList'), psActive = -1, psHits = [];
+  var ms = $('#msearch'), msIn = $('#msearchInput'), msBody = $('#msearchBody');
+  var MOBILE = window.matchMedia('(max-width: 720px)');
+  function syncSearchMode() { ps.readOnly = MOBILE.matches; if (MOBILE.matches) closeDrop(); }
+  if (MOBILE.addEventListener) MOBILE.addEventListener('change', syncSearchMode); else MOBILE.addListener(syncSearchMode);
+  syncSearchMode();
+
+  // ---- Datorn: rullgardin under fältet ----
+  function closeDrop() {
+    psList.hidden = true; psList.innerHTML = ''; psActive = -1;
+    ps.setAttribute('aria-expanded', 'false'); ps.removeAttribute('aria-activedescendant');
+  }
+  function renderDrop() {
+    var q = ps.value.trim();
+    if (MOBILE.matches || !q) { closeDrop(); return; }
+    psHits = findProducts(q, 8); psActive = -1;
+    psList.innerHTML = psHits.length ? psHits.map(function (it, i) {
+      return '<li role="option" id="ps-opt-' + i + '" data-i="' + i + '" aria-selected="false">' +
+        '<span class="psearch__name">' + highlight(it.name, q) + '</span>' +
+        '<span class="psearch__meta"><b>' + esc(it.brand) + '</b> · ' + esc(it.group) + '</span></li>';
+    }).join('') : '<li class="psearch__none" role="presentation">' + noHits(q) + '</li>';
+    psList.hidden = false;
+    ps.setAttribute('aria-expanded', 'true');
+  }
+  function setActive(i) {
+    var opts = psList.querySelectorAll('[role="option"]');
+    if (!opts.length) return;
+    psActive = (i + opts.length) % opts.length;
+    opts.forEach(function (o, k) { o.setAttribute('aria-selected', String(k === psActive)); });
+    opts[psActive].scrollIntoView({ block: 'nearest' });
+    ps.setAttribute('aria-activedescendant', opts[psActive].id);
+  }
+  ps.addEventListener('input', renderDrop);
+  ps.addEventListener('focus', function () { if (ps.value.trim()) renderDrop(); });
+  ps.addEventListener('keydown', function (e) {
+    if (MOBILE.matches) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (psList.hidden) renderDrop(); setActive(psActive + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(psActive - 1); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      var it = psHits[psActive >= 0 ? psActive : 0];
+      if (it && !psList.hidden) { closeDrop(); ps.value = ''; pickProduct(it); }
+    } else if (e.key === 'Escape') { closeDrop(); }
+  });
+  psList.addEventListener('mousedown', function (e) { e.preventDefault(); }); // behåll fokus i fältet
+  psList.addEventListener('click', function (e) {
+    var w = e.target.closest('[data-wish-q]');
+    if (w) { closeDrop(); wishQuery(w.dataset.wishQ); return; }
+    var li = e.target.closest('[data-i]');
+    if (!li) return;
+    var it = psHits[+li.dataset.i];
+    closeDrop(); ps.value = '';
+    pickProduct(it);
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.psearch')) closeDrop(); });
+
+  // ---- Mobilen: egen sökvy över hela skärmen ----
+  var GO = '<svg class="msearch__go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var msPushed = false, afterClose = null;
+  function msRow(it, q) {
+    return '<li><button type="button" class="msearch__row" data-pid="' + esc(it.pid) + '">' +
+      '<span class="msearch__ico" aria-hidden="true">' + esc(it.brand.replace(/[^A-Za-zÅÄÖåäö]/g, '').slice(0, 2).toUpperCase()) + '</span>' +
+      '<span class="msearch__txt"><span class="psearch__name">' + (q ? highlight(it.name, q) : esc(it.name)) + '</span>' +
+      '<span class="psearch__meta"><b>' + esc(it.brand) + '</b> · ' + esc(it.group) + '</span></span>' + GO + '</button></li>';
+  }
+  function renderMs() {
+    var q = msIn.value.trim();
+    if (!q) {
+      var rec = recentItems();
+      msBody.innerHTML = (rec.length ? '<h3 class="msearch__h">Senast räknade</h3><ul class="msearch__list">' +
+        rec.map(function (it) { return msRow(it); }).join('') + '</ul>' : '') +
+        '<h3 class="msearch__h">' + (rec.length ? 'Eller välj materialtyp' : 'Välj materialtyp') + '</h3><div class="chips msearch__cats">' +
+        GROUPS.map(function (g) { return '<button type="button" class="chip" data-g="' + esc(g) + '">' + esc(g) + '</button>'; }).join('') + '</div>';
+      return;
+    }
+    var hits = findProducts(q, 40);
+    msBody.innerHTML = hits.length ? '<ul class="msearch__list">' + hits.map(function (it) { return msRow(it, q); }).join('') + '</ul>' : noHits(q);
+    msBody.scrollTop = 0;
+  }
+  function openMs() {
+    if (!ms.hidden) return;
+    ms.hidden = false;
+    document.documentElement.classList.add('msearch-open');
+    msIn.value = '';
+    renderMs();
+    msIn.focus();
+    // Mobilens bakåtknapp ska stänga sökvyn, inte lämna sidan
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      history.pushState({ msearch: 1 }, '');
+      msPushed = true;
+    } catch (e) { msPushed = false; }
+  }
+  function hideMs() {
+    ms.hidden = true;
+    document.documentElement.classList.remove('msearch-open');
+  }
+  function closeMs() {
+    if (ms.hidden) return;
+    hideMs();
+    if (msPushed) { msPushed = false; history.back(); }
+  }
+  window.addEventListener('popstate', function () {
+    if (!ms.hidden) hideMs();
+    msPushed = false;
+    // Vänta tills webbläsaren är klar med bakåtsteget, annars tar den över skrollningen
+    var fn = afterClose; afterClose = null;
+    setTimeout(function () {
+      try { if ('scrollRestoration' in history) history.scrollRestoration = 'auto'; } catch (e) {}
+      if (fn) fn();
+    }, 60);
+  });
+  ps.addEventListener('click', function () { if (MOBILE.matches) openMs(); });
+  ps.addEventListener('keydown', function (e) { if (MOBILE.matches && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openMs(); } });
+  $('#msearchBack').addEventListener('click', closeMs);
+  msIn.addEventListener('input', renderMs);
+  msIn.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMs();
+    if (e.key === 'Enter') { e.preventDefault(); msIn.blur(); } // stäng tangentbordet och visa träffarna
+  });
+  msBody.addEventListener('click', function (e) {
+    var row = e.target.closest('[data-pid]'), cat = e.target.closest('[data-g]'), w = e.target.closest('[data-wish-q]');
+    if (!row && !cat && !w) return;
+    // Skrollning körs när bakåtsteget är klart (annars avbryts den). Val och fokus görs direkt i trycket.
+    var later;
+    if (row) { pickProduct(searchByPid[row.dataset.pid], true); later = scrollToArea; }
+    else if (cat) {
+      var chip = el.chips.querySelector('.chip[data-g="' + cat.dataset.g + '"]');
+      if (chip) chip.click();
+      later = function () { el.chips.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    } else { var q = w.dataset.wishQ; later = function () { wishQuery(q); }; }
+    if (msPushed) { afterClose = later; closeMs(); } else { closeMs(); later(); }
+  });
 
   /* =========================================================
      Kontakt

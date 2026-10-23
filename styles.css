@@ -519,3 +519,49 @@ html.standalone #kalkyl { padding-top: 20px; }
 @keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } }
 @keyframes fade-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .toast, .sheet__panel, .sheet__backdrop, .sheet__arrow.is-down { animation: none; } }
+
+/* ---------- Produktsök ---------- */
+.psearch { position: relative; }
+.psearch__icon { position: absolute; left: 13px; top: 50%; width: 20px; height: 20px; margin-top: -10px; fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-linecap: round; pointer-events: none; z-index: 1; }
+.psearch .input { padding-left: 42px; }
+.psearch .input[readonly] { cursor: text; }
+.psearch__or { display: flex; align-items: center; gap: 10px; margin: -4px 0 -8px; color: var(--muted); font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.psearch__or::before, .psearch__or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.psearch__list {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  box-shadow: 0 16px 40px rgb(0 0 0 / .28); max-height: 360px; overflow: auto;
+}
+.psearch__list [role="option"] { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+.psearch__list [role="option"]:hover, .psearch__list [aria-selected="true"] { background: var(--surface-2); }
+.psearch__name { font-weight: 800; color: var(--text); }
+.psearch__name mark { background: none; color: var(--accent-text); }
+.psearch__meta { font-size: .8rem; color: var(--muted); font-weight: 600; }
+.psearch__meta b { color: var(--text); font-weight: 700; }
+.psearch__empty { color: var(--muted); padding: 10px 12px; font-size: .9rem; }
+
+/* Helskärmssök på mobilen */
+.msearch { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; background: var(--bg); }
+.msearch[hidden] { display: none; }
+html.msearch-open, html.msearch-open body { overflow: hidden; }
+.msearch__head {
+  display: flex; align-items: center; gap: 6px; padding: calc(8px + env(safe-area-inset-top)) 12px 8px 6px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.msearch__back { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border: 0; border-radius: 10px; background: none; color: var(--text); cursor: pointer; }
+.msearch__back svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.msearch__head .input { flex: 1; min-width: 0; }
+.msearch__body { flex: 1; overflow: auto; overscroll-behavior: contain; padding: 4px 12px calc(16px + env(safe-area-inset-bottom)); }
+.msearch__h { margin: 16px 4px 6px; font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.msearch__list { list-style: none; margin: 0; padding: 0; }
+.msearch__list li + li { border-top: 1px solid var(--line); }
+.msearch__row {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 4px;
+  border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.msearch__row:active { background: var(--surface); }
+.msearch__ico { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); color: var(--accent-text); font-weight: 800; font-size: .78rem; }
+.msearch__txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.msearch__go { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--muted); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.msearch__cats { padding: 2px 4px; }
+.msearch .psearch__empty { padding: 20px 4px; }

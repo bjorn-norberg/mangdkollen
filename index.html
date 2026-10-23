@@ -56,7 +56,7 @@
       if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) document.documentElement.classList.add('standalone');
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=29">
+  <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
   <a class="skip" href="#kalkyl">Hoppa till kalkylatorn</a>
@@ -111,6 +111,18 @@
 
         <div class="calc">
           <form class="card calc__form" id="calcForm" novalidate>
+            <div class="field psearch-field">
+              <label class="label" for="psearch">Sök produkt</label>
+              <div class="psearch">
+                <svg class="psearch__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+                <input id="psearch" class="input" type="search" placeholder="Sök produkt, t.ex. planemix" autocomplete="off"
+                  autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"
+                  role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="psearchList">
+                <ul class="psearch__list" id="psearchList" role="listbox" aria-label="Sökträffar" hidden></ul>
+              </div>
+            </div>
+            <p class="psearch__or">eller bläddra</p>
+
             <fieldset class="field">
               <legend class="label">Materialtyp</legend>
               <div class="chips" id="groupChips" role="radiogroup"></div>
@@ -308,6 +320,15 @@
     <button class="toast__close" id="installClose" type="button" aria-label="Stäng">×</button>
   </div>
 
+  <div class="msearch" id="msearch" role="dialog" aria-modal="true" aria-label="Sök produkt" hidden>
+    <div class="msearch__head">
+      <button type="button" class="msearch__back" id="msearchBack" aria-label="Tillbaka"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <input id="msearchInput" class="input" type="search" placeholder="Sök produkt…" autocomplete="off"
+        autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" aria-label="Sök produkt">
+    </div>
+    <div class="msearch__body" id="msearchBody"></div>
+  </div>
+
   <div class="sheet" id="installSheet" hidden>
     <div class="sheet__backdrop" data-close></div>
     <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="installSheetTitle">
@@ -322,7 +343,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=29"></script>
-  <script src="app.js?v=29"></script>
+  <script src="data.js?v=30"></script>
+  <script src="app.js?v=30"></script>
 </body>
 </html>
