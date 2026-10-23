@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Räkna åtgång av avjämningsmassa, fix och bruk | Mängdkollen</title>
   <meta name="description" content="Gratis kalkylator: räkna ut hur mycket avjämningsmassa, fix, fog och bruk du behöver i kilo, säckar och vatten. Weber, Ardex, Mapei, Schönox m.fl.">
+  <meta name="author" content="Björn Norberg">
   <link rel="canonical" href="https://bygg.junestaden.se/">
   <!-- Delning i sociala medier och meddelandeappar -->
   <meta property="og:type" content="website">
@@ -30,7 +31,7 @@
     "inLanguage": "sv",
     "isAccessibleForFree": true,
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "SEK" },
-    "author": {"@type": "Person", "@id": "https://junestaden.se/#person", "name": "Björn Norberg", "url": "https://junestaden.se/", "image": "https://bygg.junestaden.se/img/profil.jpg", "jobTitle": "Student, VVS-ingenjör", "homeLocation": {"@type": "Place", "address": {"@type": "PostalAddress", "addressLocality": "Jönköping", "addressCountry": "SE"}}, "affiliation": {"@type": "CollegeOrUniversity", "name": "TUC Yrkeshögskola"}, "sameAs": ["https://www.linkedin.com/in/bj%C3%B6rn-norberg-088992345/"]}
+    "author": {"@type": "Person", "@id": "https://junestaden.se/#person", "name": "Björn Norberg", "url": "https://junestaden.se/", "image": "https://bygg.junestaden.se/img/profil.jpg", "jobTitle": "Student, VVS-ingenjör", "homeLocation": {"@type": "Place", "address": {"@type": "PostalAddress", "addressLocality": "Jönköping", "addressCountry": "SE"}}, "affiliation": {"@type": "CollegeOrUniversity", "name": "TUC Yrkeshögskola"}, "sameAs": ["https://www.linkedin.com/in/bj%C3%B6rn-norberg-088992345"]}
   }
   </script>
   <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
@@ -277,9 +278,10 @@
     <div class="wrap footer__inner">
       <p><strong>Ansvar:</strong> Resultatet är en mängdberäkning baserad på tillverkarnas publicerade riktvärden, inte ett tekniskt godkännande av konstruktionen. Kontrollera alltid aktuellt produktblad, underlag och systemkrav.</p>
       <p class="footer__meta" id="footerMeta"></p>
-      <p class="footer__meta">Fler verktyg på <a href="https://junestaden.se">junestaden.se</a></p>
+      <p class="footer__meta">© <span id="credit-year">2026</span> <a href="https://www.linkedin.com/in/bj%C3%B6rn-norberg-088992345" rel="author me noopener" target="_blank">Björn Norberg</a> · Fler verktyg på <a href="https://junestaden.se">junestaden.se</a></p>
     </div>
   </footer>
+  <script>document.getElementById('credit-year').textContent = new Date().getFullYear();</script>
 
   <nav class="tabbar" id="tabbar" aria-label="Appmeny">
     <a href="#kalkyl" data-sec="kalkyl">
