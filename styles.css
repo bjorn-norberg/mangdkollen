@@ -147,10 +147,11 @@ p { margin: 0 0 .8em; }
 .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-text); }
 .eyebrow::before { content: ""; width: 22px; height: 4px; background: var(--accent); border-radius: 2px; }
 .lead { font-size: clamp(1.05rem, 2vw, 1.2rem); color: var(--muted); max-width: 56ch; }
-.stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 0; }
-.stats div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 16px; min-width: 120px; box-shadow: var(--shadow); }
-.stats dt { font-size: .78rem; color: var(--muted); font-weight: 600; }
-.stats dd { margin: 0; font: 800 1.6rem/1.1 var(--font-display); }
+.facts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 22px 0 0; font-size: .92rem; font-weight: 600; color: var(--muted); }
+.facts > * { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); color: inherit; text-decoration: none; }
+.facts a:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); color: var(--text); }
+.facts b { color: var(--text); font-weight: 800; }
+.facts svg { width: 16px; height: 16px; fill: none; stroke: var(--accent-text); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .hero__stripe {
   position: absolute; left: 0; right: 0; bottom: 0; height: 10px;
   background: repeating-linear-gradient(-45deg, var(--stripe-b) 0 14px, var(--stripe-a) 14px 28px);
@@ -279,8 +280,41 @@ textarea.input { resize: vertical; min-height: 90px; }
 .filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
 .field--grow { flex: 1 1 260px; }
 .filters select.input { min-width: 200px; }
-.reg__count { color: var(--muted); font-size: .88rem; margin: 6px 0 12px; }
+.reg__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0 12px; }
+.reg__count { color: var(--muted); font-size: .88rem; margin: 0; }
+.reg__bar .linkbtn { flex: none; }
 .reg { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+
+/* Register grupperat per fabrikat */
+.regg-list { display: grid; gap: 10px; }
+.regg { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.regg[open] { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.regg > summary {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; min-height: 56px; cursor: pointer; list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.regg summary::-webkit-details-marker { display: none; }
+.regg__name { font: 800 1.05rem/1.2 var(--font-display); }
+.regg__count { margin-left: auto; color: var(--muted); font-size: .85rem; font-weight: 600; text-align: right; }
+.regg__chev { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); transition: transform .2s ease; }
+.regg[open] > summary > .regg__chev, .regg__miss[open] > summary > .regg__chev { transform: rotate(90deg); }
+.regg > .reg { padding: 0 12px 12px; }
+.regg .reg li { background: var(--surface-2); }
+.regg__miss { margin: 0 12px 12px; border-top: 1px dashed var(--line); }
+.regg__miss > summary {
+  display: flex; align-items: center; gap: 8px; padding: 12px 4px; min-height: 44px; cursor: pointer; list-style: none;
+  color: var(--muted); font-weight: 700; font-size: .9rem;
+}
+.regg__miss > summary .regg__chev { width: 16px; height: 16px; }
+.regg__hint { margin: 0 4px 10px; color: var(--muted); font-size: .85rem; }
+.reg--miss li { background: transparent !important; border-style: dashed; padding: 10px 12px; }
+.reg--miss .reg__name { font-weight: 700; }
+.reg__wish { font: 700 .82rem var(--font); background: none; border: 0; color: var(--accent-text); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.regg__empty { color: var(--muted); padding: 16px 0; }
+@media (max-width: 520px) {
+  .regg__miss-n { display: none; }
+  .regg > summary { padding: 12px 14px; }
+}
 .reg li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s ease, transform .15s ease; }
 .reg li:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
 .reg__brand { font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
@@ -288,7 +322,6 @@ textarea.input { resize: vertical; min-height: 90px; }
 .reg__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; align-items: center; }
 .reg__meta a { font-size: .82rem; font-weight: 700; margin-left: auto; }
 .reg__use { font: 700 .82rem var(--font); background: none; border: 0; color: var(--accent-text); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
-.reg__more { margin: 18px auto 0; display: flex; }
 
 /* ---------- Kontakt ---------- */
 .contact { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 28px; padding: clamp(20px, 4vw, 34px); }
@@ -347,7 +380,6 @@ textarea.input { resize: vertical; min-height: 90px; }
   .contact__me { flex-direction: column; align-items: center; text-align: center; }
   .filters select.input { min-width: 0; width: 100%; }
   .filters .field { flex: 1 1 100%; }
-  .stats div { min-width: calc(50% - 6px); flex: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
@@ -396,7 +428,7 @@ html.standalone #kalkyl { padding-top: 20px; }
 /* Större tryckytor på pekskärmar (min. ca 44 px) */
 @media (pointer: coarse) {
   .linkbtn { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px 8px 0; margin: -6px 0; font-size: .88rem; }
-  .reg__use, .reg__meta a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 10px; margin: -8px -10px -8px 0; }
+  .reg__use, .reg__wish, .reg__meta a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 10px; margin: -8px -10px -8px 0; }
   .reg__meta a { margin: -8px -10px -8px auto; }
   .source { min-height: 44px; margin-top: 8px; }
   .toast__close { min-width: 44px; min-height: 44px; }

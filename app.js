@@ -72,12 +72,14 @@
      ========================================================= */
   var enabledUsage = D.usage.filter(function (u) { return u.enabled; });
   var calcProducts = new Set(enabledUsage.map(function (u) { return u.productId; }));
-  $('#stats').innerHTML = [
-    ['Fabrikat', D.brands.length],
-    ['Produkter', D.products.length],
-    ['Med kalkyl', calcProducts.size],
-    ['Verifierat', D.checked]
-  ].map(function (s) { return '<div><dt>' + s[0] + '</dt><dd>' + esc(s[1]) + '</dd></div>'; }).join('');
+  // Kort rad under ingressen: fabrikat, produkter med kalkyl och när värdena kontrollerades
+  var MONTHS = ['jan', 'feb', 'mars', 'april', 'maj', 'juni', 'juli', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  var checkedParts = String(D.checked).split('-');
+  var checkedText = checkedParts.length === 3 ? MONTHS[+checkedParts[1] - 1] + ' ' + checkedParts[0] : D.checked;
+  $('#stats').innerHTML =
+    '<a href="#register"><b>' + D.brands.length + '</b> fabrikat</a>' +
+    '<a href="#register"><b>' + calcProducts.size + '</b> produkter med kalkyl</a>' +
+    '<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Värden kontrollerade ' + esc(checkedText) + '</span>';
   $('#footerMeta').textContent = 'Data kontrollerad mot tillverkarnas källor ' + D.checked + '. ' +
     D.usage.length + ' åtgångsrader, varav ' + enabledUsage.length + ' med aktiv kalkyl.';
 
@@ -534,8 +536,10 @@
   /* =========================================================
      Produktregister
      ========================================================= */
-  var reg = { q: '', brand: '', onlyCalc: false, limit: 48 };
-  var regList = $('#regList'), regCount = $('#regCount'), regMore = $('#regMore');
+  // Grupperat per fabrikat i hopfällbara rader. Produkter utan åtgångsvärde ligger i en egen hopfälld del
+  // med en knapp som fyller i kontaktformuläret.
+  var reg = { q: '', brand: '', open: {} };
+  var regList = $('#regList'), regCount = $('#regCount'), regToggle = $('#regToggleAll');
   var brandNames = D.brands.map(function (b) { return b.name; }).sort(function (a, b) { return a.localeCompare(b, 'sv'); });
   $('#regBrand').innerHTML = '<option value="">Alla fabrikat</option>' + brandNames.map(function (b) { return '<option>' + esc(b) + '</option>'; }).join('');
   $('#brandList').innerHTML = brandNames.map(function (b) { return '<option value="' + esc(b) + '">'; }).join('');
@@ -546,37 +550,99 @@
     var isEight = u.model === 'AREA_TROWEL' && trowelSize(u) === 8;
     if (!firstEnabled[u.productId] || isEight) firstEnabled[u.productId] = u.id;
   });
+  var productById = {};
+  D.products.forEach(function (p) { productById[p.id] = p; });
+  var CHEVRON = '<svg class="regg__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var byName = function (a, b) { return a.name.localeCompare(b.name, 'sv'); };
+
+  function source(p) {
+    return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">Källa ↗</a>' : '';
+  }
+  function calcItem(p) {
+    return '<li><span class="reg__name">' + esc(p.name) + '</span>' +
+      '<div class="reg__meta"><span class="tag">' + esc(p.category) + '</span>' +
+      '<button class="reg__use" type="button" data-u="' + firstEnabled[p.id] + '">Räkna</button>' + source(p) + '</div></li>';
+  }
+  function missItem(p) {
+    var gone = /utg/i.test(p.status || '');
+    return '<li><span class="reg__name">' + esc(p.name) + '</span>' +
+      '<div class="reg__meta"><span class="tag">' + esc(p.category) + '</span>' +
+      (gone ? '<span class="tag tag--warn">Utgången</span>'
+            : '<button class="reg__wish" type="button" data-wish="' + esc(p.id) + '">Önska kalkyl</button>') +
+      source(p) + '</div></li>';
+  }
 
   function renderReg() {
     var q = reg.q.trim().toLowerCase();
-    var list = D.products.filter(function (p) {
-      if (reg.brand && p.brand.toLowerCase() !== reg.brand.toLowerCase()) return false;
-      if (reg.onlyCalc && !firstEnabled[p.id]) return false;
-      if (q && (p.brand + ' ' + p.name + ' ' + p.category).toLowerCase().indexOf(q) < 0) return false;
-      return true;
-    }).sort(function (a, b) {
-      return (firstEnabled[a.id] ? 0 : 1) - (firstEnabled[b.id] ? 0 : 1) || a.brand.localeCompare(b.brand, 'sv') || a.name.localeCompare(b.name, 'sv');
-    });
-    regCount.textContent = list.length + ' av ' + D.products.length + ' poster';
-    regList.innerHTML = list.slice(0, reg.limit).map(function (p) {
-      var calc = firstEnabled[p.id];
-      var gone = /utg/i.test(p.status || '');
-      var tags = '<span class="tag">' + esc(p.category) + '</span>' +
-        (calc ? '<button class="reg__use" type="button" data-u="' + calc + '">Räkna</button>' :
-          '<span class="tag ' + (gone ? 'tag--warn' : '') + '">' + (gone ? 'Utgången' : p.usageRows ? 'Kalkyl blockerad' : 'Åtgång saknas') + '</span>');
-      return '<li><span class="reg__brand">' + esc(p.brand) + '</span><span class="reg__name">' + esc(p.name) + '</span>' +
-        '<div class="reg__meta">' + tags + (p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">Källa ↗</a>' : '') + '</div></li>';
+    var searching = !!(q || reg.brand);
+    var nCalc = 0, nMiss = 0, nGroups = 0;
+    var html = brandNames.map(function (name) {
+      if (reg.brand && name.toLowerCase() !== reg.brand.toLowerCase()) return '';
+      var ps = D.products.filter(function (p) {
+        return p.brand.toLowerCase() === name.toLowerCase() &&
+          (!q || (p.brand + ' ' + p.name + ' ' + p.category).toLowerCase().indexOf(q) >= 0);
+      });
+      if (!ps.length) return '';
+      var calc = ps.filter(function (p) { return firstEnabled[p.id]; }).sort(byName);
+      var miss = ps.filter(function (p) { return !firstEnabled[p.id]; }).sort(byName);
+      nCalc += calc.length; nMiss += miss.length; nGroups++;
+      var open = searching || reg.open[name];
+      var missOpen = (q && miss.length) || !calc.length;
+      return '<details class="regg" data-b="' + esc(name) + '"' + (open ? ' open' : '') + '>' +
+        '<summary><span class="regg__name">' + esc(name) + '</span>' +
+        '<span class="regg__count">' + (calc.length ? calc.length + ' med kalkyl' : 'Ingen kalkyl än') +
+        (miss.length ? '<span class="regg__miss-n"> · ' + miss.length + ' saknar</span>' : '') + '</span>' + CHEVRON + '</summary>' +
+        (calc.length ? '<ul class="reg">' + calc.map(calcItem).join('') + '</ul>' : '') +
+        (miss.length ? '<details class="regg__miss"' + (missOpen ? ' open' : '') + '><summary>' + CHEVRON +
+          'Saknar åtgångsvärde (' + miss.length + ')</summary>' +
+          '<p class="regg__hint">Tillverkaren anger inget åtgångsvärde som vi har kunnat verifiera. Tryck på Önska kalkyl så tittar jag på den.</p>' +
+          '<ul class="reg reg--miss">' + miss.map(missItem).join('') + '</ul></details>' : '') +
+        '</details>';
     }).join('');
-    regMore.hidden = list.length <= reg.limit;
+    regList.innerHTML = html || '<p class="regg__empty">Inga produkter matchar sökningen.</p>';
+    regCount.textContent = searching
+      ? (nCalc + nMiss) + ' träffar i ' + nGroups + ' fabrikat'
+      : nCalc + ' produkter med kalkyl från ' + nGroups + ' fabrikat' + (nMiss ? ' · ' + nMiss + ' saknar åtgångsvärde' : '');
+    regToggle.hidden = searching;
+    syncToggle();
   }
-  $('#regSearch').addEventListener('input', function (e) { reg.q = e.target.value; reg.limit = 48; renderReg(); });
-  $('#regBrand').addEventListener('change', function (e) { reg.brand = e.target.value; reg.limit = 48; renderReg(); });
-  $('#regOnlyCalc').addEventListener('change', function (e) { reg.onlyCalc = e.target.checked; reg.limit = 48; renderReg(); });
-  regMore.addEventListener('click', function () { reg.limit += 48; renderReg(); });
+  function syncToggle() {
+    var all = regList.querySelectorAll('.regg');
+    var anyClosed = Array.prototype.some.call(all, function (d) { return !d.open; });
+    regToggle.textContent = anyClosed ? 'Fäll ut alla' : 'Fäll ihop alla';
+  }
+  // Kom ihåg vilka fabrikat som är utfällda (toggle-händelsen bubblar inte, därför capture)
+  regList.addEventListener('toggle', function (e) {
+    var d = e.target;
+    if (!d.classList || !d.classList.contains('regg') || reg.q.trim() || reg.brand) return;
+    reg.open[d.dataset.b] = d.open;
+    syncToggle();
+  }, true);
+  regToggle.addEventListener('click', function () {
+    var openAll = regToggle.textContent === 'Fäll ut alla';
+    brandNames.forEach(function (b) { reg.open[b] = openAll; });
+    renderReg();
+  });
+  $('#regSearch').addEventListener('input', function (e) { reg.q = e.target.value; renderReg(); });
+  $('#regBrand').addEventListener('change', function (e) { reg.brand = e.target.value; renderReg(); });
   regList.addEventListener('click', function (e) {
     var b = e.target.closest('[data-u]');
-    if (b) selectUsage(b.dataset.u);
+    if (b) { selectUsage(b.dataset.u); return; }
+    var w = e.target.closest('[data-wish]');
+    if (w) wishProduct(productById[w.dataset.wish]);
   });
+  // "Önska kalkyl": fyll i kontaktformuläret och hoppa dit
+  function wishProduct(p) {
+    if (!p) return;
+    var f = $('#contactForm');
+    f.elements.fabrikat.value = p.brand;
+    f.elements.produkt.value = p.name;
+    if (!f.elements.meddelande.value.trim()) f.elements.meddelande.value = 'Jag skulle vilja kunna räkna åtgång för den här produkten.';
+    var msgEl = $('#formMsg');
+    msgEl.className = 'form-msg ok'; msgEl.textContent = 'Produkten är ifylld. Skriv ditt namn och din e-post och skicka.';
+    $('#kontakt').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function () { f.elements.namn.focus({ preventScroll: true }); }, 450);
+  }
   renderReg();
 
   /* =========================================================

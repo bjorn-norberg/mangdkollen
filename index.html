@@ -56,7 +56,7 @@
       if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) document.documentElement.classList.add('standalone');
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=28">
+  <link rel="stylesheet" href="styles.css?v=29">
 </head>
 <body>
   <a class="skip" href="#kalkyl">Hoppa till kalkylatorn</a>
@@ -96,7 +96,7 @@
         <p class="eyebrow">Räkna åtgång för avjämning, fix och bruk</p>
         <h1>Räkna rätt mängd innan du åker till bygghandeln.</h1>
         <p class="lead">Välj fabrikat och produkt. Ange yta och skikt så får du kilo, säckar och vatten, beräknat med tillverkarens egna åtgångsvärden.</p>
-        <dl class="stats" id="stats"></dl>
+        <p class="facts" id="stats"></p>
       </div>
       <div class="hero__stripe" aria-hidden="true"></div>
     </section>
@@ -220,7 +220,7 @@
       <div class="wrap">
         <div class="section__head">
           <h2>Produktregister</h2>
-          <p>Alla fabrikat och produkter i registret, med länk till källan. Fler åtgångsvärden fylls på allt eftersom.</p>
+          <p>Alla fabrikat och produkter, med länk till källan. Tryck på ett fabrikat för att se produkterna. Saknas ett åtgångsvärde kan du önska det.</p>
         </div>
         <div class="filters">
           <label class="field field--grow">
@@ -231,14 +231,12 @@
             <span class="sr-only">Fabrikat</span>
             <select id="regBrand" class="input"></select>
           </label>
-          <label class="check">
-            <input id="regOnlyCalc" type="checkbox">
-            <span>Bara med kalkyl</span>
-          </label>
         </div>
-        <p class="reg__count" id="regCount" aria-live="polite"></p>
-        <ul class="reg" id="regList"></ul>
-        <button class="btn btn--ghost reg__more" id="regMore" type="button" hidden>Visa fler</button>
+        <div class="reg__bar">
+          <p class="reg__count" id="regCount" aria-live="polite"></p>
+          <button class="linkbtn" id="regToggleAll" type="button">Fäll ut alla</button>
+        </div>
+        <div class="regg-list" id="regList"></div>
       </div>
     </section>
 
@@ -324,7 +322,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=28"></script>
-  <script src="app.js?v=28"></script>
+  <script src="data.js?v=29"></script>
+  <script src="app.js?v=29"></script>
 </body>
 </html>

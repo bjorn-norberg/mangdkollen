@@ -3,3 +3,4 @@
 tools/
 VERIFIERING.md
 __pycache__/
+.claude/
