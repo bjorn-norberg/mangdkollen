@@ -853,6 +853,31 @@
     if (msPushed) { afterClose = later; closeMs(); } else { closeMs(); later(); }
   });
 
+
+  // Förstoringsglaset i sidhuvudet och Sök-fliken: helskärmssök på mobilen, annars sökfältet i kalkylatorn
+  document.querySelectorAll('[data-search-open]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (MOBILE.matches) { openMs(); return; }
+      ps.focus({ preventScroll: true });
+      ps.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  // Sifferfälten: första klicket lägger alltid markören sist, var man än klickar i fältet.
+  // Klickar man igen när fältet redan är aktivt kan markören flyttas som vanligt.
+  var caretField = null, caretAt = 0;
+  function isNumField(t) { return t && t.tagName === 'INPUT' && t.getAttribute('inputmode') === 'decimal'; }
+  document.addEventListener('focusin', function (e) {
+    if (isNumField(e.target)) { caretField = e.target; caretAt = Date.now(); }
+  });
+  function caretToEnd(e) {
+    var t = e.target;
+    if (t !== caretField || Date.now() - caretAt > 700) return;
+    var put = function () { var n = t.value.length; try { t.setSelectionRange(n, n); } catch (err) {} };
+    put(); setTimeout(put, 0); // mobiler placerar markören lite senare, därför två gånger
+  }
+  ['mouseup', 'touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, caretToEnd); });
+
   /* =========================================================
      Kontakt
      ========================================================= */

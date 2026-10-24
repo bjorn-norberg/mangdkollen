@@ -467,11 +467,12 @@ html.standalone #kalkyl { padding-top: 20px; }
   html.standalone .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
   html.standalone body.has-resultbar .toast { bottom: calc(148px + env(safe-area-inset-bottom)); }
 }
-.tabbar a {
+.tabbar a, .tabbar button {
   position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   min-height: 52px; border-radius: 12px; color: var(--muted); text-decoration: none; font: 700 .72rem var(--font);
   -webkit-tap-highlight-color: transparent;
 }
+.tabbar button { border: 0; background: none; padding: 0; cursor: pointer; }
 .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .tabbar a[aria-current="true"] { color: var(--text); }
 .tabbar a[aria-current="true"] svg { stroke: var(--accent-text); }
@@ -565,3 +566,25 @@ html.msearch-open, html.msearch-open body { overflow: hidden; }
 .msearch__go { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--muted); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .msearch__cats { padding: 2px 4px; }
 .msearch .psearch__empty { padding: 20px 4px; }
+
+/* Förstoringsglas i sidhuvudet */
+.topsearch {
+  width: 40px; height: 40px; flex: none; display: grid; place-items: center; margin-left: 4px;
+  border: 1px solid var(--line); border-radius: 99px; background: none; color: var(--text); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.topsearch:hover { border-color: var(--accent); }
+.topsearch svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+@media (max-width: 720px) {
+  .topbar__inner { gap: 8px; }
+  .topsearch { margin-left: 2px; }
+}
+/* I installerad app finns Sök i nedre menyn i stället */
+@media (max-width: 920px) {
+  html.standalone .topsearch { display: none; }
+}
+@media (max-width: 400px) {
+  .topbar__inner { gap: 6px; }
+  .nav a { padding-left: 5px; padding-right: 5px; }
+  .topsearch { width: 36px; height: 36px; margin-left: 0; }
+}
