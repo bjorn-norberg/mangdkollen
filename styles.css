@@ -1,10 +1,36 @@
 /* =========================================================
    Mängdkollen – tema
+   Mörkt:  antracit med byggul accent. Är standard och följer inte enhetens inställning.
    Ljust:  "Kalkputs & ockra" – varm benvit bakgrund, vit yta,
            byggul som fyllnadsfärg och mörk ockra för text/länkar.
-   Mörkt:  antracit med byggul accent.
+           Väljs med knappen i sidhuvudet och sparas i webbläsaren.
    ========================================================= */
 :root {
+  --bg: #17181a;
+  --bg-alt: #1d1e21;
+  --surface: #232529;
+  --surface-2: #2d3036;
+  --line: #59606a;
+  --text: #f6f4ef;
+  --muted: #c6c3bb;
+  --accent: #ffc20e;
+  --accent-strong: #ffd23f;
+  --on-accent: #17181a;
+  --accent-text: #ffc20e;
+  --ok: #86e0ab;
+  --warn: #ffc468;
+  --danger: #ff9c94;
+  --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .35);
+  --stripe-a: #232529;
+  --stripe-b: #ffc20e;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Archivo", "Arial Narrow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
   --bg: #f4f1ea;
   --bg-alt: #ebe7dd;
   --surface: #ffffff;
@@ -22,54 +48,7 @@
   --shadow: 0 1px 2px rgb(30 30 30 / .06), 0 8px 24px rgb(30 30 30 / .07);
   --stripe-a: #1f2123;
   --stripe-b: #ffc20e;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Archivo", "Arial Narrow", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1c1d1f;
-    --bg-alt: #222427;
-    --surface: #2a2c30;
-    --surface-2: #33363a;
-    --line: #41454b;
-    --text: #eeece6;
-    --muted: #a8a59d;
-    --accent: #ffc20e;
-    --accent-strong: #ffd23f;
-    --on-accent: #1c1d1f;
-    --accent-text: #ffc20e;
-    --ok: #6fcf97;
-    --warn: #ffb547;
-    --danger: #ff8a80;
-    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 10px 30px rgb(0 0 0 / .25);
-    --stripe-a: #2a2c30;
-    --stripe-b: #ffc20e;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #1c1d1f;
-  --bg-alt: #222427;
-  --surface: #2a2c30;
-  --surface-2: #33363a;
-  --line: #41454b;
-  --text: #eeece6;
-  --muted: #a8a59d;
-  --accent: #ffc20e;
-  --accent-strong: #ffd23f;
-  --on-accent: #1c1d1f;
-  --accent-text: #ffc20e;
-  --ok: #6fcf97;
-  --warn: #ffb547;
-  --danger: #ff8a80;
-  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 10px 30px rgb(0 0 0 / .25);
-  --stripe-a: #2a2c30;
-  --stripe-b: #ffc20e;
-  color-scheme: dark;
 }
 
 /* ---------- Bas ---------- */
@@ -112,8 +91,6 @@ p { margin: 0 0 .8em; }
 .nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: .95rem; padding: 8px 12px; border-radius: 8px; }
 .nav a:hover { color: var(--text); background: var(--surface-2); }
 .theme { display: flex; align-items: center; gap: 6px; }
-.theme__auto { font: 600 .75rem var(--font); color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 99px; padding: 3px 9px; cursor: pointer; }
-.theme__auto:hover { color: var(--text); }
 
 /* Switch */
 .switch { background: none; border: 0; padding: 4px; cursor: pointer; }
@@ -432,7 +409,6 @@ html.standalone #kalkyl { padding-top: 20px; }
   .reg__meta a { margin: -8px -10px -8px auto; }
   .source { min-height: 44px; margin-top: 8px; }
   .toast__close { min-width: 44px; min-height: 44px; }
-  .theme__auto { min-height: 34px; padding: 6px 12px; }
   .switch { padding: 8px 4px; }
   .check { min-height: 44px; }
 }

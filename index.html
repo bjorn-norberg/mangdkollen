@@ -34,9 +34,8 @@
     "author": {"@type": "Person", "@id": "https://junestaden.se/#person", "name": "Björn Norberg", "url": "https://junestaden.se/", "image": "https://bygg.junestaden.se/img/profil.jpg", "jobTitle": "Student, VVS-ingenjör", "homeLocation": {"@type": "Place", "address": {"@type": "PostalAddress", "addressLocality": "Jönköping", "addressCountry": "SE"}}, "affiliation": {"@type": "CollegeOrUniversity", "name": "TUC Yrkeshögskola"}, "sameAs": ["https://www.linkedin.com/in/bj%C3%B6rn-norberg-088992345"]}
   }
   </script>
-  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1c1d1f" media="(prefers-color-scheme: dark)">
-  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#17181a">
+  <meta name="color-scheme" content="dark light">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
   <link rel="icon" href="icons/mangdkollen-32.png?v=3" type="image/png" sizes="32x32">
@@ -47,16 +46,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mängdkollen">
   <script>
-    // Sätt tema före första renderingen för att undvika blink
+    // Mörkt är standard och följer inte enhetens tema. Bara ett sparat val av ljust ändrar det.
+    // Sätts före första renderingen för att undvika blink.
     (function () {
-      try {
-        var t = localStorage.getItem('theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-      } catch (e) {}
+      var t = 'dark';
+      try { if (localStorage.getItem('theme') === 'light') t = 'light'; } catch (e) {}
+      document.documentElement.dataset.theme = t;
       if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) document.documentElement.classList.add('standalone');
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=31">
+  <link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body>
   <a class="skip" href="#kalkyl">Hoppa till kalkylatorn</a>
@@ -86,7 +85,6 @@
             <span class="switch__thumb"></span>
           </span>
         </button>
-        <button id="themeAuto" class="theme__auto" type="button" hidden>Auto</button>
       </div>
     </div>
   </header>
@@ -348,7 +346,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=31"></script>
-  <script src="app.js?v=31"></script>
+  <script src="data.js?v=32"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>

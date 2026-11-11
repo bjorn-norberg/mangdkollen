@@ -38,33 +38,21 @@
      Tema
      ========================================================= */
   var root = document.documentElement;
-  var mq = window.matchMedia('(prefers-color-scheme: dark)');
   var themeToggle = $('#themeToggle');
-  var themeAuto = $('#themeAuto');
 
-  function effectiveDark() {
-    var t = root.dataset.theme;
-    return t ? t === 'dark' : mq.matches;
-  }
+  // Mörkt är standard. Knappen växlar mellan mörkt och ljust, och valet sparas i webbläsaren.
+  function isDark() { return root.dataset.theme !== 'light'; }
   function syncTheme() {
-    var dark = effectiveDark();
-    themeToggle.setAttribute('aria-checked', String(dark));
-    themeAuto.hidden = !root.dataset.theme;
+    themeToggle.setAttribute('aria-checked', String(isDark()));
     var bg = getComputedStyle(root).getPropertyValue('--bg').trim();
     document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute('content', bg); });
   }
   themeToggle.addEventListener('click', function () {
-    var next = effectiveDark() ? 'light' : 'dark';
+    var next = isDark() ? 'light' : 'dark';
     root.dataset.theme = next;
     try { localStorage.setItem('theme', next); } catch (e) {}
     syncTheme();
   });
-  themeAuto.addEventListener('click', function () {
-    delete root.dataset.theme;
-    try { localStorage.removeItem('theme'); } catch (e) {}
-    syncTheme();
-  });
-  (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(syncTheme);
   syncTheme();
 
   /* =========================================================
