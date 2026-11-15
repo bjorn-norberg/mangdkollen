@@ -1,5 +1,5 @@
 /* Service worker – offlinestöd för Mängdkollen */
-const VERSION = 'atgang-v37';
+const VERSION = 'atgang-v38';
 const SHELL = [
   './',
   'index.html',
