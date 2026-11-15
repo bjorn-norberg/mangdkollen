@@ -377,10 +377,15 @@ textarea.input { resize: vertical; min-height: 90px; }
   border: 0; border-radius: 16px; background: var(--accent); color: var(--on-accent);
   font: inherit; text-align: left; cursor: pointer;
   box-shadow: 0 8px 28px rgb(0 0 0 / .28);
-  transform: translateY(calc(100% + 24px)); opacity: 0; pointer-events: none;
-  transition: transform .25s ease, opacity .2s ease;
+  /* Tonas in på plats. Den får inte glida upp genom skärmens nederkant: då tar iOS-Safari den gula färgen till sin
+     nedre verktygsrad och behåller den. visibility: hidden när raden är dold gör att Safari släpper den helt. */
+  transform: translateY(4px); opacity: 0; visibility: hidden; pointer-events: none;
+  transition: transform .25s ease, opacity .2s ease, visibility 0s linear .25s;
 }
-.resultbar.is-visible { transform: none; opacity: 1; pointer-events: auto; }
+.resultbar.is-visible {
+  transform: none; opacity: 1; visibility: visible; pointer-events: auto;
+  transition: transform .25s ease, opacity .2s ease, visibility 0s;
+}
 .resultbar__text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .resultbar__main { font: 800 1.25rem/1.15 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .resultbar__sub { font-weight: 700; font-size: .85rem; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
