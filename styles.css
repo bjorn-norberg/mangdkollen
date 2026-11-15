@@ -386,6 +386,10 @@ textarea.input { resize: vertical; min-height: 90px; }
 .resultbar__sub { font-weight: 700; font-size: .85rem; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .resultbar__icon { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 @media (min-width: 921px) { .resultbar { display: none; } }
+/* Smal fast kant längst ner i sidans färg. iOS-Safari färgar annars sin nedre verktygsrad efter det gula som ligger närmast kanten. */
+@media (max-width: 920px) {
+  body::after { content: ""; position: fixed; left: 0; right: 0; bottom: 0; height: 3px; background: var(--bg); z-index: 54; pointer-events: none; }
+}
 
 /* Installerad app: hoppa över startbilden och gå rakt till kalkylatorn */
 html.standalone .hero { display: none; }
