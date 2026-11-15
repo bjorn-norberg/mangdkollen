@@ -55,7 +55,7 @@
       if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) document.documentElement.classList.add('standalone');
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=32">
+  <link rel="stylesheet" href="styles.css?v=33">
 </head>
 <body>
   <a class="skip" href="#kalkyl">Hoppa till kalkylatorn</a>
@@ -222,6 +222,12 @@
           </form>
 
           <aside class="card result" id="result" aria-live="polite"></aside>
+          <div class="installcard" id="installToast" role="region" aria-label="Installera appen" hidden>
+            <img class="installcard__icon" src="icons/icon-192.png" alt="" width="36" height="36">
+            <span class="installcard__text"><strong>Använder du Mängdkollen ofta?</strong><small>Lägg appen på hemskärmen</small></span>
+            <button class="btn btn--small" id="installBtn" type="button">Installera</button>
+            <button class="installcard__close" id="installClose" type="button" aria-label="Stäng">×</button>
+          </div>
         </div>
       </div>
     </section>
@@ -316,12 +322,6 @@
     <svg class="resultbar__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
   </button>
 
-  <div class="toast" id="installToast" role="region" aria-label="Installera appen" hidden>
-    <img class="toast__icon" src="icons/icon-192.png" alt="" width="36" height="36">
-    <span class="toast__text"><strong>Installera som app</strong><small>Snabbare start, fungerar offline</small></span>
-    <button class="btn btn--small" id="installBtn" type="button">Installera</button>
-    <button class="toast__close" id="installClose" type="button" aria-label="Stäng">×</button>
-  </div>
 
   <div class="msearch" id="msearch" role="dialog" aria-modal="true" aria-label="Sök produkt" hidden>
     <div class="msearch__head">
@@ -335,7 +335,7 @@
   <div class="sheet" id="installSheet" hidden>
     <div class="sheet__backdrop" data-close></div>
     <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="installSheetTitle">
-      <button class="toast__close sheet__close" type="button" aria-label="Stäng" data-close>×</button>
+      <button class="sheet__close" type="button" aria-label="Stäng" data-close>×</button>
       <div class="sheet__head">
         <img src="icons/icon-192.png" alt="" width="48" height="48">
         <div><h2 id="installSheetTitle">Lägg till Mängdkollen</h2><p>Så lägger du appen på hemskärmen.</p></div>
@@ -346,7 +346,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=32"></script>
-  <script src="app.js?v=32"></script>
+  <script src="data.js?v=33"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>

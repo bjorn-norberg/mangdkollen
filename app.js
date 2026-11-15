@@ -923,7 +923,8 @@
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
   }
-  // Flytande ruta "Installera som app". Knappen tar en direkt till sista steget:
+  // Raden "Installera" under resultatet. Den visas först när man har räknat något, aldrig som flytande ruta.
+  // Knappen tar en direkt till sista steget:
   // Android/Chrome/Edge/Samsung visar webbläsarens egen installationsruta,
   // på iPhone/iPad (där Apple inte tillåter att sidan öppnar den) visas en kort guide som pekar på Dela-knappen.
   var toast = $('#installToast'), installBtn = $('#installBtn'), sheet = $('#installSheet'), deferred = null;
@@ -935,15 +936,18 @@
   var hiddenByUser = store.get('installHidden');
   var ICON = { share: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M7 10H5.5A1.5 1.5 0 0 0 4 11.5v8A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5v-8a1.5 1.5 0 0 0-1.5-1.5H17"/></svg>', add: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M12 8.5v7M8.5 12h7"/></svg>', dots: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>' };
 
-  function showToast() { if (!standalone && !hiddenByUser) toast.hidden = false; }
+  var calculated = false;  // sant efter första ändringen i kalkylatorn
+  // På mobilen visas raden även där webbläsaren saknar egen installationsruta (iPhone, Firefox m.fl.)
+  function showToast() { if (!standalone && !hiddenByUser && calculated && (deferred || isMobile)) toast.hidden = false; }
   function hideToast() { toast.hidden = true; }
 
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault(); deferred = e;
     showToast();
   });
-  // På mobilen visas rutan även där webbläsaren inte har någon egen installationsruta (iPhone, Firefox m.fl.)
-  if (isMobile) setTimeout(showToast, 1500);
+  ['input', 'change'].forEach(function (ev) {
+    el.calcForm.addEventListener(ev, function () { if (!calculated) { calculated = true; showToast(); } });
+  });
 
   function openGuide() {
     var steps, hint;

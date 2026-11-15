@@ -320,24 +320,19 @@ textarea.input { resize: vertical; min-height: 90px; }
 .footer__meta { font-size: .8rem; }
 .footer__meta a { color: inherit; }
 
-/* ---------- Install-toast ---------- */
-.toast {
-  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-  display: flex; align-items: center; gap: 10px; z-index: 60;
-  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
-  padding: 8px 6px 8px 8px; border-radius: 18px; font-size: .92rem;
-  width: max-content; max-width: calc(100% - 24px);
-  animation: toast-in .35s cubic-bezier(.2, .9, .3, 1.2) both;
+/* ---------- Installera-rad under resultatet ---------- */
+.installcard {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 10px 6px 10px 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: .92rem;
 }
-.toast[hidden] { display: none; }
-.toast__icon { width: 36px; height: 36px; border-radius: 9px; flex: none; }
-.toast__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
-.toast__text strong { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.toast__text small { color: var(--muted); font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@keyframes toast-in { from { transform: translate(-50%, 120%); opacity: 0; } }
-@media (max-width: 380px) { .toast__icon { display: none; } .toast { padding-left: 14px; } }
-@media (max-width: 330px) { .toast__text small { display: none; } }
-.toast__close { background: none; border: 0; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 4px 8px; }
+.installcard[hidden] { display: none; }
+@media (min-width: 921px) { .installcard { justify-self: start; width: min(100%, 520px); } }
+.installcard__icon { width: 36px; height: 36px; border-radius: 9px; flex: none; }
+.installcard__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; flex: 1; }
+.installcard__text strong { font-weight: 800; }
+.installcard__text small { color: var(--muted); font-size: .78rem; font-weight: 600; }
+.installcard .btn { flex: none; }
+.installcard__close { background: none; border: 0; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 4px 10px; }
 
 /* ---------- Responsivt ---------- */
 @media (max-width: 920px) {
@@ -391,7 +386,6 @@ textarea.input { resize: vertical; min-height: 90px; }
 .resultbar__main { font: 800 1.25rem/1.15 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .resultbar__sub { font-weight: 700; font-size: .85rem; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .resultbar__icon { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-body.has-resultbar .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
 @media (min-width: 921px) { .resultbar { display: none; } }
 
 /* Installerad app: hoppa över startbilden och gå rakt till kalkylatorn */
@@ -408,7 +402,7 @@ html.standalone #kalkyl { padding-top: 20px; }
   .reg__use, .reg__wish, .reg__meta a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 10px; margin: -8px -10px -8px 0; }
   .reg__meta a { margin: -8px -10px -8px auto; }
   .source { min-height: 44px; margin-top: 8px; }
-  .toast__close { min-width: 44px; min-height: 44px; }
+  .installcard__close { min-width: 44px; min-height: 44px; }
   .switch { padding: 8px 4px; }
   .check { min-height: 44px; }
 }
@@ -440,8 +434,6 @@ html.standalone #kalkyl { padding-top: 20px; }
   }
   html.standalone body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
   html.standalone .resultbar { bottom: calc(76px + env(safe-area-inset-bottom)); }
-  html.standalone .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
-  html.standalone body.has-resultbar .toast { bottom: calc(148px + env(safe-area-inset-bottom)); }
 }
 .tabbar a, .tabbar button {
   position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
@@ -467,7 +459,7 @@ html.standalone #kalkyl { padding-top: 20px; }
   padding: 20px 20px 16px; box-shadow: 0 20px 60px rgb(0 0 0 / .4);
   animation: sheet-in .3s cubic-bezier(.2, .9, .3, 1.1) both;
 }
-.sheet__close { position: absolute; top: 8px; right: 8px; }
+.sheet__close { position: absolute; top: 8px; right: 8px; background: none; border: 0; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 4px 8px; min-width: 44px; min-height: 44px; }
 .sheet__head { display: flex; align-items: center; gap: 14px; padding-right: 36px; }
 .sheet__head img { width: 48px; height: 48px; border-radius: 12px; flex: none; }
 .sheet__head h2 { margin: 0; font: 800 1.2rem/1.2 var(--font-display); }
@@ -495,7 +487,7 @@ html.standalone #kalkyl { padding-top: 20px; }
 @keyframes nudge { 50% { transform: translateY(6px); } }
 @keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } }
 @keyframes fade-in { from { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .toast, .sheet__panel, .sheet__backdrop, .sheet__arrow.is-down { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .sheet__panel, .sheet__backdrop, .sheet__arrow.is-down { animation: none; } }
 
 /* ---------- Produktsök ---------- */
 .psearch { position: relative; }
@@ -563,4 +555,29 @@ html.msearch-open, html.msearch-open body { overflow: hidden; }
   .topbar__inner { gap: 6px; }
   .nav a { padding-left: 5px; padding-right: 5px; }
   .topsearch { width: 36px; height: 36px; margin-left: 0; }
+}
+
+/* Kortare startsida på mobil: kalkylatorn ska synas utan att man scrollar */
+@media (max-width: 720px) {
+  html:not(.standalone) .hero { padding: 18px 0 20px; }
+  .hero .eyebrow { font-size: .68rem; }
+  .hero h1 { font-size: 1.55rem; max-width: none; margin: .35em 0 .3em; }
+  .hero .lead {
+    font-size: .92rem; margin: 0 0 4px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .facts {
+    flex-wrap: nowrap; overflow-x: auto; gap: 6px; margin: 12px -16px 0; padding: 0 16px 2px;
+    scrollbar-width: none; font-size: .8rem;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+            mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .facts::-webkit-scrollbar { display: none; }
+  .facts > * { flex: none; padding: 5px 10px; }
+  .facts > span { display: none; }  /* kontrolldatumet finns i sidfoten */
+  .hero__stripe { height: 6px; }
+  #kalkyl.section { padding-top: 20px; }
+  #kalkyl .section__head { margin-bottom: 12px; }
+  #kalkyl .section__head h2 { font-size: 1.25rem; }
+  #kalkyl .section__head p { display: none; }
 }
